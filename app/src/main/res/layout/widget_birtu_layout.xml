@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:padding="12dp">
+
+    <!-- Title line -->
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/widget_status_chip"
+        android:ellipsize="end"
+        android:fontFamily="@font/lexend"
+        android:maxLines="1"
+        android:text="@string/app_name"
+        android:textColor="#2B1A0A"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Optional Late / Status Chip -->
+    <TextView
+        android:id="@+id/widget_status_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:background="#C62F3F"
+        android:fontFamily="@font/lexend"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="2dp"
+        android:text="@string/status_late"
+        android:textColor="#FFFFFF"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <!-- Middle: Big Timer or Chronometer -->
+    <TextView
+        android:id="@+id/widget_timer_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:fontFamily="@font/lexend"
+        android:text="00:00:00"
+        android:textColor="#2B1A0A"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <Chronometer
+        android:id="@+id/widget_chronometer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:fontFamily="@font/lexend"
+        android:textColor="#2B1A0A"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <!-- Since text line -->
+    <TextView
+        android:id="@+id/widget_since_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/widget_btn_start_over"
+        android:ellipsize="end"
+        android:fontFamily="@font/lexend"
+        android:maxLines="1"
+        android:textColor="#7B5B3E"
+        android:textSize="11sp" />
+
+    <!-- Start over button at bottom right (40dp) -->
+    <ImageButton
+        android:id="@+id/widget_btn_start_over"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/widget_button_bg"
+        android:contentDescription="@string/action_start_over"
+        android:src="@drawable/ic_widget_restart" />
+
+</RelativeLayout>

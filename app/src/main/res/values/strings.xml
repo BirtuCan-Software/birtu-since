@@ -1,0 +1,187 @@
+<resources>
+    <string name="app_name">BirtuSince</string>
+    <string name="app_full_name">BirtuSince: Last Time Log</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_add">New</string>
+    <string name="nav_put_away">Put away</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- General Actions -->
+    <string name="action_start_over">Start over</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_resume">Resume</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_bring_back">Bring back</string>
+    <string name="action_save">Save</string>
+    <string name="action_keep">Keep</string>
+    <string name="action_start">Start</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_unlock">Unlock</string>
+    <string name="action_show_all">Show all</string>
+    <string name="action_done">Done</string>
+    <string name="action_close">Close</string>
+    <string name="action_back">Back</string>
+    <string name="action_open">Open</string>
+
+    <!-- Status & States -->
+    <string name="status_running">Running</string>
+    <string name="status_paused">Paused</string>
+    <string name="status_late">Late</string>
+    <string name="status_late_by">Late by %1$s</string>
+    <string name="status_locked">Locked</string>
+    <string name="status_locked_item">Locked item</string>
+    <string name="status_clock_looks_off">Clock looks off</string>
+    <string name="status_clock_warning_banner">Clock looks off. We will catch up.</string>
+    <string name="status_time_left">%1$s left</string>
+
+    <!-- Home & Summaries -->
+    <string name="summary_running">%1$d running</string>
+    <string name="summary_late">%1$d late</string>
+    <string name="filter_all">All</string>
+    <string name="filter_late">Late</string>
+    <string name="since_format">Since %1$s</string>
+    <string name="empty_home_title">Nothing yet</string>
+    <string name="empty_home_body">Tap New to start.</string>
+    <string name="search_placeholder">Search items</string>
+    <string name="no_search_results">No match</string>
+
+    <!-- Quick Add & Item Creation -->
+    <string name="sheet_new_title">New</string>
+    <string name="input_what_happened">What happened?</string>
+    <string name="chip_started_now">Started: Now</string>
+    <string name="chip_started_val">Started: %1$s</string>
+    <string name="chip_group">Group</string>
+    <string name="chip_remind_me">Remind me</string>
+    <string name="chip_remind_val">Every %1$d %2$s</string>
+    <string name="chip_lock_it">Lock it</string>
+    <string name="chip_note">Note</string>
+    <string name="draft_kept">Draft kept</string>
+
+    <!-- Quick picks -->
+    <string name="pick_now">Now</string>
+    <string name="pick_1_hour_ago">1 hour ago</string>
+    <string name="pick_yesterday">Yesterday</string>
+    <string name="pick_custom_time">Pick time</string>
+    <string name="err_not_in_future">Not in the future</string>
+    <string name="err_too_early">Too early</string>
+
+    <!-- Start over sheet -->
+    <string name="start_over_title">Start over?</string>
+    <string name="start_over_saved_note">This run (%1$s) will be saved.</string>
+    <string name="start_over_just_now">Just now</string>
+    <string name="started_over_toast">Started over</string>
+    <string name="started_over_undo">Started over. Undo</string>
+
+    <!-- Units -->
+    <string name="unit_auto">Auto</string>
+    <string name="unit_days">Days</string>
+    <string name="unit_hours">Hours</string>
+    <string name="unit_min">Min</string>
+    <string name="unit_sec">Sec</string>
+    <string name="tap_to_change">Tap to change</string>
+
+    <!-- Detail screen -->
+    <string name="label_remind_me_after">Remind me after</string>
+    <string name="label_group">Group</string>
+    <string name="label_note">Note</string>
+    <string name="label_lock_it">Lock it</string>
+    <string name="val_off">Off</string>
+    <string name="section_your_pattern">Your pattern</string>
+    <string name="pattern_empty_hint">Start over once more to see your pattern.</string>
+    <string name="stat_average">Average</string>
+    <string name="stat_shortest">Shortest</string>
+    <string name="stat_longest">Longest</string>
+    <string name="stat_steady">Steady</string>
+    <string name="chart_goal">Goal</string>
+    <string name="section_past_runs">Past runs</string>
+    <string name="total_past_runs">%1$d total</string>
+    <string name="run_number">#%1$d</string>
+
+    <!-- Edit and Dialogs -->
+    <string name="edit_item_title">Edit</string>
+    <string name="edit_past_run_title">Past run #%1$d</string>
+    <string name="field_started">Started</string>
+    <string name="field_ended">Ended</string>
+    <string name="delete_dialog_title">Delete this?</string>
+    <string name="delete_dialog_body">It and all its past runs will be gone for good.</string>
+
+    <!-- Put Away -->
+    <string name="empty_put_away">Nothing put away</string>
+
+    <!-- Stats Screen -->
+    <string name="stats_tile_running">Running</string>
+    <string name="stats_tile_late">Late</string>
+    <string name="stats_tile_restarts">Restarts</string>
+    <string name="section_longest_runs">Longest runs</string>
+    <string name="section_most_restarts">Most restarts</string>
+    <string name="stats_empty_hint">Add a few items to see more.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_section_look">Look</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_tangelo">Tangelo</string>
+    <string name="theme_arctic">Arctic</string>
+    <string name="theme_obsidian">Obsidian</string>
+
+    <string name="settings_section_lock">Lock</string>
+    <string name="settings_app_lock">App lock</string>
+    <string name="settings_app_lock_caption">Fingerprint or face to open.</string>
+
+    <string name="settings_section_backup">Backup</string>
+    <string name="settings_save_copy">Save a copy</string>
+    <string name="settings_bring_back_copy">Bring back a copy</string>
+    <string name="settings_stays_on_phone">Stays on your phone.</string>
+    <string name="backup_saved">Copy saved</string>
+    <string name="backup_restored">All back</string>
+    <string name="restore_dialog_title">Replace or add?</string>
+    <string name="restore_replace_all">Replace everything</string>
+    <string name="restore_add_existing">Add to what I have</string>
+
+    <string name="settings_section_alerts">Alerts</string>
+    <string name="settings_reminders">Reminders</string>
+    <string name="val_on">On</string>
+
+    <string name="settings_section_about">About</string>
+    <string name="app_version">Version 1.0</string>
+    <string name="no_internet_promise">No internet. Ever.</string>
+
+    <!-- Lock screen -->
+    <string name="lock_screen_title">Locked</string>
+    <string name="lock_screen_try_again">Try again</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Reminders</string>
+    <string name="notification_channel_desc">Local reminder notifications for items reaching target time.</string>
+    <string name="notification_time_up">Time is up</string>
+    <string name="notification_body_format">%1$s. It has been %2$s.</string>
+    <string name="notification_locked_body">A locked item is ready.</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="qs_tile_label">New</string>
+    <string name="qs_tile_subtitle">Start one</string>
+
+    <!-- How It Works Interactive Tour (max 5 steps) -->
+    <string name="help_tour_title">How it works</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_next">Next</string>
+    <string name="tour_step_counter_format">%1$d of %2$d</string>
+
+    <string name="tour_guided_step1_title">Track time since</string>
+    <string name="tour_guided_step1_body">BirtuSince counts the exact time elapsed since your habits, events, and tasks last occurred.</string>
+
+    <string name="tour_guided_step2_title">Always here to help</string>
+    <string name="tour_guided_step2_body">Tap this help icon anytime on any screen to learn how the app works.</string>
+
+    <string name="tour_guided_step3_title">Find your items</string>
+    <string name="tour_guided_step3_body">Type here to filter and search your active records instantly.</string>
+
+    <string name="tour_guided_step4_title">Start in two taps</string>
+    <string name="tour_guided_step4_body">Tap New to log something new. You can also pick a past time if it happened earlier.</string>
+
+    <string name="tour_guided_step5_title">See your patterns</string>
+    <string name="tour_guided_step5_body">Check Stats to see your shortest, longest, and average runs over time.</string>
+</resources>
