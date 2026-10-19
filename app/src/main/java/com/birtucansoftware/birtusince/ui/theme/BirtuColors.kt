@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.theme
+package com.birtucansoftware.birtusince.ui.theme
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -25,7 +25,16 @@ data class BirtuColors(
     val onLate: Color,
     val scrim: Color,
     val isDark: Boolean = false
-)
+) {
+    val rose: Color
+        get() = if (isDark) Color(0xFFF43F5E) else Color(0xFFE11D48)
+
+    val roseSoft: Color
+        get() = if (isDark) Color(0xFF2E1922) else Color(0xFFFFE4E6)
+
+    val roseStrong: Color
+        get() = if (isDark) Color(0xFFFF6289) else Color(0xFFBE123C)
+}
 
 enum class ThemePreset {
     Tangelo,  // Bright Orange Tangelo & Warm Slate (Default)

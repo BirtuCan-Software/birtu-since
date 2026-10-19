@@ -8,6 +8,7 @@ import com.birtucansoftware.birtusince.data.ItemEntity
 import com.birtucansoftware.birtusince.data.LapEntity
 import com.birtucansoftware.birtusince.notifications.AlarmScheduler
 import com.birtucansoftware.birtusince.shortcuts.DynamicShortcutsManager
+import com.birtucansoftware.birtusince.domain.FilterSelection
 import com.birtucansoftware.birtusince.ui.theme.ThemePreset
 import com.birtucansoftware.birtusince.widget.BirtuAppWidgetProvider
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val isDarkMode: StateFlow<Boolean> = preferences.isDarkModeFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val filterSelection: StateFlow<FilterSelection> = preferences.filterSelectionFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, FilterSelection())
 
     val selectedFilter: StateFlow<String> = preferences.selectedFilterFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, "All")
@@ -119,6 +123,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setDraftTitle(draft: String) {
         viewModelScope.launch {
             preferences.setDraftTitle(draft)
+        }
+    }
+
+    fun setFilterSelection(selection: FilterSelection) {
+        viewModelScope.launch {
+            preferences.setFilterSelection(selection)
         }
     }
 

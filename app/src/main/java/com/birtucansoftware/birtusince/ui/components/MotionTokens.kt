@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.components
+package com.birtucansoftware.birtusince.ui.components
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.core.Spring
@@ -90,10 +90,13 @@ fun Modifier.birtuCardPress(
 fun Modifier.birtuChipPress(
     enabled: Boolean = true,
     shape: Shape = RoundedCornerShape(percent = 50),
+    onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit
 ): Modifier = birtuPress(
     scaleDown = 0.95f,
     enabled = enabled,
     shape = shape,
+    onLongClick = onLongClick,
     onClick = onClick
 )
+

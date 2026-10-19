@@ -182,6 +182,7 @@ class MainActivity : FragmentActivity() {
         val snackbarEvent by this@MainActivity.viewModel.snackbarEvent.collectAsState()
         val themePreset by this@MainActivity.viewModel.themePreset.collectAsState()
         val isDarkMode by this@MainActivity.viewModel.isDarkMode.collectAsState()
+        val filterSelection by this@MainActivity.viewModel.filterSelection.collectAsState()
         val selectedFilter by this@MainActivity.viewModel.selectedFilter.collectAsState()
         val sortOption by this@MainActivity.viewModel.sortOption.collectAsState()
         val isSortAscending by this@MainActivity.viewModel.isSortAscending.collectAsState()
@@ -435,6 +436,8 @@ class MainActivity : FragmentActivity() {
                             items = activeItems,
                             currentTick = currentTick,
                             unlockedItemIds = unlockedItemIds,
+                            filterSelection = filterSelection,
+                            onFilterSelectionChange = { selection -> viewModel.setFilterSelection(selection) },
                             selectedFilter = selectedFilter,
                             onFilterSelect = { filter -> viewModel.setSelectedFilter(filter) },
                             sortOption = sortOption,

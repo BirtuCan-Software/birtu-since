@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -24,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.birtucansoftware.birtusince.domain.FilterSelection
 import com.birtucansoftware.birtusince.domain.SortOption
 import com.birtucansoftware.birtusince.ui.components.BirtuPrimaryButton
 import com.birtucansoftware.birtusince.ui.components.BirtuSegmentedControl
@@ -40,16 +43,19 @@ fun SortBottomSheet(
     visible: Boolean,
     selectedOption: SortOption,
     isAscending: Boolean,
+    filterSelection: FilterSelection = FilterSelection(),
     selectedFilter: String = "All",
     onOptionSelect: (SortOption) -> Unit,
     onAscendingToggle: (Boolean) -> Unit,
+    onFilterSelectionChange: ((FilterSelection) -> Unit)? = null,
     onFilterSelect: ((String) -> Unit)? = null,
     onClearFilter: (() -> Unit)? = null,
     onDismissRequest: () -> Unit
 ) {
     val colors = LocalBirtuColors.current
 
-    val hasActiveFilter = selectedFilter != "All"
+    val effectiveFilter = if (!filterSelection.isEmpty) filterSelection else FilterSelection.fromLegacyString(selectedFilter)
+    val hasActiveFilter = !effectiveFilter.isEmpty
     val hasActiveCustomSort = selectedOption != SortOption.CREATED_AT || isAscending
     val hasActiveFilterOrSort = hasActiveFilter || hasActiveCustomSort
 
@@ -100,6 +106,7 @@ fun SortBottomSheet(
                         } else {
                             onOptionSelect(SortOption.CREATED_AT)
                             onAscendingToggle(false)
+                            onFilterSelectionChange?.invoke(FilterSelection())
                             onFilterSelect?.invoke("All")
                         }
                     },
@@ -113,42 +120,63 @@ fun SortBottomSheet(
         if (hasActiveFilter) {
             Spacer(modifier = Modifier.height(10.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
                     text = "Active filter:",
                     style = BirtuTypography.caption.copy(color = colors.text2)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (colors.isDark) colors.surfaceRaised else colors.primarySoft)
-                        .border(
-                            1.dp,
-                            if (colors.isDark) colors.outline else colors.primaryStrong.copy(alpha = 0.35f),
-                            RoundedCornerShape(8.dp)
-                        )
-                        .clickable { onFilterSelect?.invoke("All") }
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = selectedFilter,
-                            style = BirtuTypography.caption.copy(
-                                color = colors.primaryStrong,
-                                fontWeight = FontWeight.Medium
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        PhosphorIcon(
-                            icon = PhosphorIcons.X,
-                            contentDescription = "Clear filter",
-                            tint = colors.primaryStrong,
-                            size = 12.dp
-                        )
-                    }
+
+                if (effectiveFilter.isLateIncluded) {
+                    ActiveFilterPill(
+                        label = "Late",
+                        isExcluded = false,
+                        onRemove = {
+                            val next = effectiveFilter.toggleIncludeLate()
+                            onFilterSelectionChange?.invoke(next)
+                            onFilterSelect?.invoke(if (next.isEmpty) "All" else "Custom")
+                        }
+                    )
+                }
+
+                if (effectiveFilter.isLateExcluded) {
+                    ActiveFilterPill(
+                        label = "Late",
+                        isExcluded = true,
+                        onRemove = {
+                            val next = effectiveFilter.toggleExcludeLate()
+                            onFilterSelectionChange?.invoke(next)
+                            onFilterSelect?.invoke(if (next.isEmpty) "All" else "Custom")
+                        }
+                    )
+                }
+
+                effectiveFilter.includedCategories.forEach { cat ->
+                    ActiveFilterPill(
+                        label = cat,
+                        isExcluded = false,
+                        onRemove = {
+                            val next = effectiveFilter.toggleIncludeCategory(cat)
+                            onFilterSelectionChange?.invoke(next)
+                            onFilterSelect?.invoke(if (next.isEmpty) "All" else "Custom")
+                        }
+                    )
+                }
+
+                effectiveFilter.excludedCategories.forEach { cat ->
+                    ActiveFilterPill(
+                        label = cat,
+                        isExcluded = true,
+                        onRemove = {
+                            val next = effectiveFilter.toggleExcludeCategory(cat)
+                            onFilterSelectionChange?.invoke(next)
+                            onFilterSelect?.invoke(if (next.isEmpty) "All" else "Custom")
+                        }
+                    )
                 }
             }
         }
@@ -282,3 +310,42 @@ private data class SortOptionItem(
     val option: SortOption,
     val icon: PhosphorIconData
 )
+
+@Composable
+private fun ActiveFilterPill(
+    label: String,
+    isExcluded: Boolean,
+    onRemove: () -> Unit
+) {
+    val colors = LocalBirtuColors.current
+    val bgColor = if (isExcluded) colors.roseSoft else if (colors.isDark) colors.surfaceRaised else colors.primarySoft
+    val contentColor = if (isExcluded) colors.roseStrong else colors.primaryStrong
+    val borderColor = if (isExcluded) colors.roseStrong.copy(alpha = 0.35f) else if (colors.isDark) colors.outline else colors.primaryStrong.copy(alpha = 0.35f)
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(bgColor)
+            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+            .clickable(onClick = onRemove)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (isExcluded) "× $label" else label,
+                style = BirtuTypography.caption.copy(
+                    color = contentColor,
+                    fontWeight = FontWeight.Medium
+                )
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            PhosphorIcon(
+                icon = PhosphorIcons.X,
+                contentDescription = "Remove filter",
+                tint = contentColor,
+                size = 12.dp
+            )
+        }
+    }
+}
+

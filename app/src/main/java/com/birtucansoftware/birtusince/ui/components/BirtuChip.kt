@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.components
+package com.birtucansoftware.birtusince.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -38,28 +38,48 @@ import com.birtucansoftware.birtusince.ui.icons.PhosphorIcons
 import com.birtucansoftware.birtusince.ui.theme.BirtuTypography
 import com.birtucansoftware.birtusince.ui.theme.LocalBirtuColors
 
+enum class FilterChipState {
+    Neutral,
+    Included,
+    Excluded
+}
+
 @Composable
 fun BirtuChip(
     label: String,
-    selected: Boolean,
+    state: FilterChipState = FilterChipState.Neutral,
     onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     icon: PhosphorIconData? = null
 ) {
     val colors = LocalBirtuColors.current
     val shape = RoundedCornerShape(percent = 50)
 
-    val targetBgColor = if (selected) colors.primarySoft else colors.surfaceHigh
-    val targetTextColor = if (selected) colors.primaryStrong else colors.text
-    val targetBorderColor = if (selected) colors.primaryStrong.copy(alpha = 0.35f) else colors.outline
+    val targetBgColor = when (state) {
+        FilterChipState.Included -> colors.primarySoft
+        FilterChipState.Excluded -> colors.roseSoft
+        FilterChipState.Neutral -> colors.surfaceHigh
+    }
+    val targetTextColor = when (state) {
+        FilterChipState.Included -> colors.primaryStrong
+        FilterChipState.Excluded -> colors.roseStrong
+        FilterChipState.Neutral -> colors.text
+    }
+    val targetBorderColor = when (state) {
+        FilterChipState.Included -> colors.primaryStrong.copy(alpha = 0.35f)
+        FilterChipState.Excluded -> colors.roseStrong.copy(alpha = 0.35f)
+        FilterChipState.Neutral -> colors.outline
+    }
 
     val animSpec = tween<Color>(durationMillis = 200)
     val bgColor by animateColorAsState(targetBgColor, animSpec, label = "chipBg")
     val textColor by animateColorAsState(targetTextColor, animSpec, label = "chipText")
     val borderColor by animateColorAsState(targetBorderColor, animSpec, label = "chipBorder")
 
+    val isHighlighted = state != FilterChipState.Neutral
     val scale by animateFloatAsState(
-        targetValue = if (selected) 1.03f else 1.0f,
+        targetValue = if (isHighlighted) 1.03f else 1.0f,
         animationSpec = tween(durationMillis = 100),
         label = "chipScale"
     )
@@ -74,7 +94,11 @@ fun BirtuChip(
             .clip(shape)
             .background(bgColor)
             .border(1.dp, borderColor, shape)
-            .birtuChipPress(shape = shape, onClick = onClick)
+            .birtuChipPress(
+                shape = shape,
+                onLongClick = onLongClick,
+                onClick = onClick
+            )
             .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -83,14 +107,14 @@ fun BirtuChip(
             horizontalArrangement = Arrangement.Center
         ) {
             AnimatedVisibility(
-                visible = selected,
+                visible = state == FilterChipState.Included,
                 enter = fadeIn() + expandHorizontally(),
                 exit = fadeOut() + shrinkHorizontally()
             ) {
                 Row {
                     PhosphorIcon(
                         icon = PhosphorIcons.Check,
-                        contentDescription = null,
+                        contentDescription = "Included",
                         tint = textColor,
                         size = 16.dp
                     )
@@ -98,7 +122,23 @@ fun BirtuChip(
                 }
             }
 
-            if (!selected && icon != null) {
+            AnimatedVisibility(
+                visible = state == FilterChipState.Excluded,
+                enter = fadeIn() + expandHorizontally(),
+                exit = fadeOut() + shrinkHorizontally()
+            ) {
+                Row {
+                    PhosphorIcon(
+                        icon = PhosphorIcons.X,
+                        contentDescription = "Excluded",
+                        tint = textColor,
+                        size = 16.dp
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+            }
+
+            if (state == FilterChipState.Neutral && icon != null) {
                 PhosphorIcon(
                     icon = icon,
                     contentDescription = null,
@@ -112,10 +152,26 @@ fun BirtuChip(
                 text = label,
                 style = BirtuTypography.label.copy(
                     color = textColor,
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                    fontWeight = if (isHighlighted) FontWeight.SemiBold else FontWeight.Medium,
                     fontSize = 13.sp
                 )
             )
         }
     }
 }
+
+@Composable
+fun BirtuChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: PhosphorIconData? = null
+) = BirtuChip(
+    label = label,
+    state = if (selected) FilterChipState.Included else FilterChipState.Neutral,
+    onClick = onClick,
+    modifier = modifier,
+    icon = icon
+)
+

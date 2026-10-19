@@ -47,8 +47,10 @@ import com.birtucansoftware.birtusince.domain.ItemState
 import com.birtucansoftware.birtusince.domain.ItemStateResolver
 import com.birtucansoftware.birtusince.ui.components.BirtuChip
 import com.birtucansoftware.birtusince.ui.components.BirtuIconButton
+import com.birtucansoftware.birtusince.domain.FilterSelection
 import com.birtucansoftware.birtusince.ui.components.BirtuInfoIconButton
 import com.birtucansoftware.birtusince.ui.components.BirtuTextButton
+import com.birtucansoftware.birtusince.ui.components.FilterChipState
 import com.birtucansoftware.birtusince.ui.icons.PhosphorIcon
 import com.birtucansoftware.birtusince.ui.icons.PhosphorIcons
 import com.birtucansoftware.birtusince.ui.theme.BirtuTypography
@@ -59,6 +61,8 @@ fun HomeScreen(
     items: List<ItemEntity>,
     currentTick: Long,
     unlockedItemIds: Set<Long>,
+    filterSelection: FilterSelection = FilterSelection(),
+    onFilterSelectionChange: (FilterSelection) -> Unit = {},
     selectedFilter: String = "All",
     onFilterSelect: (String) -> Unit = {},
     sortOption: com.birtucansoftware.birtusince.domain.SortOption = com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT,
@@ -115,14 +119,23 @@ fun HomeScreen(
         items.map { it.category }.filter { it.isNotBlank() }.distinct()
     }
 
+    val currentFilterSelection = remember(filterSelection, selectedFilter) {
+        if (!filterSelection.isEmpty) {
+            filterSelection
+        } else if (selectedFilter != "All") {
+            FilterSelection.fromLegacyString(selectedFilter)
+        } else {
+            filterSelection
+        }
+    }
+
     // Filter and search
-    val filteredItems = remember(resolvedItems, selectedFilter, searchQuery) {
+    val filteredItems = remember(resolvedItems, currentFilterSelection, searchQuery) {
         resolvedItems.filter { (item, derived) ->
-            val matchesFilter = when (selectedFilter) {
-                "All" -> true
-                "Late" -> derived.state is ItemState.Late
-                else -> item.category.equals(selectedFilter, ignoreCase = true)
-            }
+            val matchesFilter = currentFilterSelection.matches(
+                category = item.category,
+                isLate = derived.state is ItemState.Late
+            )
             val matchesSearch = if (searchQuery.isBlank()) {
                 true
             } else if (item.isPrivate && !unlockedItemIds.contains(item.id)) {
@@ -316,19 +329,49 @@ fun HomeScreen(
             Spacer(modifier = Modifier.width(8.dp))
             BirtuChip(
                 label = "All",
-                selected = selectedFilter == "All",
-                onClick = { onFilterSelect("All") }
+                state = if (currentFilterSelection.isEmpty) FilterChipState.Included else FilterChipState.Neutral,
+                onClick = {
+                    onFilterSelectionChange(FilterSelection())
+                    onFilterSelect("All")
+                }
             )
             BirtuChip(
                 label = "Late",
-                selected = selectedFilter == "Late",
-                onClick = { onFilterSelect("Late") }
+                state = when {
+                    currentFilterSelection.isLateIncluded -> FilterChipState.Included
+                    currentFilterSelection.isLateExcluded -> FilterChipState.Excluded
+                    else -> FilterChipState.Neutral
+                },
+                onClick = {
+                    val next = currentFilterSelection.toggleIncludeLate()
+                    onFilterSelectionChange(next)
+                    onFilterSelect(if (next.isLateIncluded) "Late" else "All")
+                },
+                onLongClick = {
+                    val next = currentFilterSelection.toggleExcludeLate()
+                    onFilterSelectionChange(next)
+                    onFilterSelect("All")
+                }
             )
             groups.forEach { groupName ->
+                val chipState = when {
+                    currentFilterSelection.isCategoryIncluded(groupName) -> FilterChipState.Included
+                    currentFilterSelection.isCategoryExcluded(groupName) -> FilterChipState.Excluded
+                    else -> FilterChipState.Neutral
+                }
                 BirtuChip(
                     label = groupName,
-                    selected = selectedFilter.equals(groupName, ignoreCase = true),
-                    onClick = { onFilterSelect(groupName) }
+                    state = chipState,
+                    onClick = {
+                        val next = currentFilterSelection.toggleIncludeCategory(groupName)
+                        onFilterSelectionChange(next)
+                        onFilterSelect(if (next.isCategoryIncluded(groupName)) groupName else "All")
+                    },
+                    onLongClick = {
+                        val next = currentFilterSelection.toggleExcludeCategory(groupName)
+                        onFilterSelectionChange(next)
+                        onFilterSelect("All")
+                    }
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -336,7 +379,7 @@ fun HomeScreen(
 
         // List Content or Empty State with smooth filter transition
         AnimatedContent(
-            targetState = if (isLoading) "loading" else selectedFilter,
+            targetState = if (isLoading) "loading" else currentFilterSelection.toString(),
             transitionSpec = {
                 (fadeIn(animationSpec = tween(180)) + slideInVertically(animationSpec = tween(180)) { it / 8 })
                     .togetherWith(fadeOut(animationSpec = tween(120)))
@@ -429,12 +472,13 @@ fun HomeScreen(
                             text = "No match",
                             style = BirtuTypography.titleM.copy(color = colors.text)
                         )
-                        if (searchQuery.isNotEmpty() || selectedFilter != "All" || sortOption != com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT || isSortAscending) {
+                        if (searchQuery.isNotEmpty() || !currentFilterSelection.isEmpty || sortOption != com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT || isSortAscending) {
                             Spacer(modifier = Modifier.height(8.dp))
                             BirtuTextButton(
                                 text = "Clear filter",
                                 onClick = {
                                     searchQuery = ""
+                                    onFilterSelectionChange(FilterSelection())
                                     onFilterSelect("All")
                                     onSortOptionSelect(com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT)
                                     onSortAscendingToggle(false)
@@ -483,13 +527,16 @@ fun HomeScreen(
         visible = showSortSheet,
         selectedOption = sortOption,
         isAscending = isSortAscending,
+        filterSelection = currentFilterSelection,
         selectedFilter = selectedFilter,
         onOptionSelect = onSortOptionSelect,
         onAscendingToggle = onSortAscendingToggle,
+        onFilterSelectionChange = onFilterSelectionChange,
         onFilterSelect = onFilterSelect,
         onClearFilter = {
             onSortOptionSelect(com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT)
             onSortAscendingToggle(false)
+            onFilterSelectionChange(FilterSelection())
             onFilterSelect("All")
         },
         onDismissRequest = { showSortSheet = false }
