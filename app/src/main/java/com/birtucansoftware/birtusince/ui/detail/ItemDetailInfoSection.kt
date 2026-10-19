@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.detail
+package com.birtucansoftware.birtusince.ui.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -188,6 +188,38 @@ fun ItemDetailInfoSection(
                         val targetNotes = if (item.notes.isBlank()) decryptedNotes else item.notes
                         onUpdateItem(item.copy(isPrivate = checked, title = targetTitle, notes = targetNotes))
                     }
+                }
+            )
+        }
+
+        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.outline))
+
+        // Row 5: One-time event switch
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "One-time event", style = BirtuTypography.body.copy(color = colors.text))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    BirtuInfoIconButton(
+                        title = "One-time Event",
+                        explanation = "One-time events cannot be started over. They track elapsed time continuously from a fixed occurrence and do not appear in restart statistics."
+                    )
+                }
+                Text(
+                    text = if (item.isOneTime) "Cannot be started over" else "Can be started over",
+                    style = BirtuTypography.caption.copy(color = colors.text2)
+                )
+            }
+            BirtuSwitch(
+                checked = item.isOneTime,
+                onCheckedChange = { checked ->
+                    onUpdateItem(item.copy(isOneTime = checked))
                 }
             )
         }

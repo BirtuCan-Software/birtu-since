@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.data
+package com.birtucansoftware.birtusince.data
 
 import org.json.JSONArray
 import org.json.JSONObject
@@ -52,6 +52,9 @@ object BackupSerializer {
             itemObj.put("encryptedTitle", item.encryptedTitle ?: "")
             itemObj.put("encryptedNotes", item.encryptedNotes ?: "")
             itemObj.put("createdAtEpochMillis", item.createdAtEpochMillis)
+            itemObj.put("isPinned", item.isPinned)
+            itemObj.put("lastModifiedEpochMillis", item.lastModifiedEpochMillis)
+            itemObj.put("isOneTime", item.isOneTime)
             itemsArray.put(itemObj)
         }
         root.put("items", itemsArray)
@@ -117,7 +120,10 @@ object BackupSerializer {
                     preferredUnit = obj.optString("preferredUnit", "auto"),
                     encryptedTitle = finalEncTitle,
                     encryptedNotes = finalEncNotes,
-                    createdAtEpochMillis = obj.optLong("createdAtEpochMillis", System.currentTimeMillis())
+                    createdAtEpochMillis = obj.optLong("createdAtEpochMillis", System.currentTimeMillis()),
+                    isPinned = obj.optBoolean("isPinned", false),
+                    lastModifiedEpochMillis = obj.optLong("lastModifiedEpochMillis", obj.optLong("createdAtEpochMillis", System.currentTimeMillis())),
+                    isOneTime = obj.optBoolean("isOneTime", false)
                 )
                 items.add(RawItem(oldId, item))
             }

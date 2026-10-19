@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.data
+package com.birtucansoftware.birtusince.data
 
 import android.content.Context
 import com.birtucansoftware.birtusince.domain.TimeEngine
@@ -30,7 +30,8 @@ class BirtuRepository(
         categoryIcon: String = "Timer",
         notes: String = "",
         targetIntervalMillis: Long? = null,
-        isPrivate: Boolean = false
+        isPrivate: Boolean = false,
+        isOneTime: Boolean = false
     ): Long {
         val (encTitle, encNotes) = if (isPrivate) {
             KeystoreCrypto.encrypt(title) to KeystoreCrypto.encrypt(notes)
@@ -53,7 +54,10 @@ class BirtuRepository(
             preferredUnit = TimeEngine.UNIT_AUTO,
             encryptedTitle = encTitle,
             encryptedNotes = encNotes,
-            createdAtEpochMillis = System.currentTimeMillis()
+            createdAtEpochMillis = System.currentTimeMillis(),
+            isPinned = false,
+            lastModifiedEpochMillis = System.currentTimeMillis(),
+            isOneTime = isOneTime
         )
         return itemDao.insertItem(item)
     }
@@ -83,9 +87,28 @@ class BirtuRepository(
             title = realTitle,
             notes = realNotes,
             encryptedTitle = encTitle,
-            encryptedNotes = encNotes
+            encryptedNotes = encNotes,
+            lastModifiedEpochMillis = System.currentTimeMillis()
         )
         itemDao.updateItem(processedItem)
+    }
+
+    suspend fun togglePinItem(itemId: Long) {
+        val item = itemDao.getItemById(itemId) ?: return
+        val updated = item.copy(
+            isPinned = !item.isPinned,
+            lastModifiedEpochMillis = System.currentTimeMillis()
+        )
+        itemDao.updateItem(updated)
+    }
+
+    suspend fun setItemPinned(itemId: Long, isPinned: Boolean) {
+        val item = itemDao.getItemById(itemId) ?: return
+        val updated = item.copy(
+            isPinned = isPinned,
+            lastModifiedEpochMillis = System.currentTimeMillis()
+        )
+        itemDao.updateItem(updated)
     }
 
     /**
@@ -95,6 +118,7 @@ class BirtuRepository(
      */
     suspend fun startOver(itemId: Long, resetAtEpochMillis: Long = System.currentTimeMillis()): LapEntity? {
         val item = itemDao.getItemById(itemId) ?: return null
+        if (item.isOneTime) return null
 
         val previousStart = item.startEpochMillis
         val effectiveEnd = if (resetAtEpochMillis > previousStart) resetAtEpochMillis else System.currentTimeMillis()
@@ -115,7 +139,8 @@ class BirtuRepository(
             startEpochMillis = effectiveEnd,
             isPaused = false,
             pauseTimestamp = null,
-            lifetimeRestarts = runNumber
+            lifetimeRestarts = runNumber,
+            lastModifiedEpochMillis = System.currentTimeMillis()
         )
         itemDao.updateItem(updatedItem)
         return lap.copy(id = generatedId)
@@ -131,7 +156,8 @@ class BirtuRepository(
         itemDao.deleteLapById(lapId)
         val revertedItem = item.copy(
             startEpochMillis = lap.startEpochMillis,
-            lifetimeRestarts = (item.lifetimeRestarts - 1).coerceAtLeast(0)
+            lifetimeRestarts = (item.lifetimeRestarts - 1).coerceAtLeast(0),
+            lastModifiedEpochMillis = System.currentTimeMillis()
         )
         itemDao.updateItem(revertedItem)
     }
@@ -140,7 +166,7 @@ class BirtuRepository(
         val item = itemDao.getItemById(itemId) ?: return
         if (item.isPaused) return
         val now = System.currentTimeMillis()
-        itemDao.updateItem(item.copy(isPaused = true, pauseTimestamp = now))
+        itemDao.updateItem(item.copy(isPaused = true, pauseTimestamp = now, lastModifiedEpochMillis = now))
     }
 
     suspend fun resumeItem(itemId: Long) {
@@ -149,17 +175,17 @@ class BirtuRepository(
         val now = System.currentTimeMillis()
         val pausedDuration = (now - item.pauseTimestamp).coerceAtLeast(0L)
         val newStart = item.startEpochMillis + pausedDuration
-        itemDao.updateItem(item.copy(isPaused = false, pauseTimestamp = null, startEpochMillis = newStart))
+        itemDao.updateItem(item.copy(isPaused = false, pauseTimestamp = null, startEpochMillis = newStart, lastModifiedEpochMillis = now))
     }
 
     suspend fun putAwayItem(itemId: Long) {
         val item = itemDao.getItemById(itemId) ?: return
-        itemDao.updateItem(item.copy(isArchived = true))
+        itemDao.updateItem(item.copy(isArchived = true, lastModifiedEpochMillis = System.currentTimeMillis()))
     }
 
     suspend fun bringBackItem(itemId: Long) {
         val item = itemDao.getItemById(itemId) ?: return
-        itemDao.updateItem(item.copy(isArchived = false))
+        itemDao.updateItem(item.copy(isArchived = false, lastModifiedEpochMillis = System.currentTimeMillis()))
     }
 
     suspend fun deleteItem(itemId: Long) {

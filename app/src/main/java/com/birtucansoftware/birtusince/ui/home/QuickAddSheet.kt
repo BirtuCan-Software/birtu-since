@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.home
+package com.birtucansoftware.birtusince.ui.home
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -62,7 +62,8 @@ fun QuickAddSheet(
         categoryIcon: String,
         notes: String,
         targetIntervalMillis: Long?,
-        isPrivate: Boolean
+        isPrivate: Boolean,
+        isOneTime: Boolean
     ) -> Unit,
     existingGroups: List<String> = emptyList(),
     initialDraft: String = ""
@@ -76,6 +77,7 @@ fun QuickAddSheet(
     var selectedGroupIcon by remember(visible) { mutableStateOf("Timer") }
     var reminderIntervalMillis by remember(visible) { mutableStateOf<Long?>(null) }
     var isPrivate by remember(visible) { mutableStateOf(false) }
+    var isOneTime by remember(visible) { mutableStateOf(false) }
     var noteText by remember(visible) { mutableStateOf("") }
 
     // Expanded option sub-panels: "started", "group", "remind", "note", or null
@@ -121,7 +123,8 @@ fun QuickAddSheet(
                             selectedGroupIcon,
                             noteText.trim(),
                             reminderIntervalMillis,
-                            isPrivate
+                            isPrivate,
+                            isOneTime
                         )
                     }
                 }
@@ -212,6 +215,16 @@ fun QuickAddSheet(
                     icon = PhosphorIcons.Note,
                     onClick = {
                         activeSubPanel = if (activeSubPanel == "note") null else "note"
+                    }
+                )
+
+                // 6. One-time event chip
+                BirtuChip(
+                    label = if (isOneTime) "One-time event" else "Can restart",
+                    selected = isOneTime,
+                    icon = if (isOneTime) PhosphorIcons.Sparkle else PhosphorIcons.ArrowCounterClockwise,
+                    onClick = {
+                        isOneTime = !isOneTime
                     }
                 )
             }
@@ -414,7 +427,8 @@ fun QuickAddSheet(
                             selectedGroupIcon,
                             noteText.trim(),
                             reminderIntervalMillis,
-                            isPrivate
+                            isPrivate,
+                            isOneTime
                         )
                     }
                 },

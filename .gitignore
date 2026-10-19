@@ -1,30 +1,71 @@
-*.iml
-.gradle
-.kotlin
-/local.properties
-local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-build/
-app/build/
-/captures
-.externalNativeBuild
-.cxx
+# =========================================================================
+# Official Android & Gradle GitIgnore Template (GitHub & Google Standards)
+# =========================================================================
 
-# Secrets & Keystores
+# Built application packages & artifacts
+*.apk
+*.aar
+*.ap_
+*.aab
+release/
+**/release/
+
+# Compiled Dalvik & Java class files
+*.dex
+*.class
+
+# Generated build directories
+build/
+**/build/
+bin/
+gen/
+out/
+
+# Gradle runtime & cache directories
+.gradle/
+
+# Local SDK & machine configuration
+local.properties
+/local.properties
+
+# Log files
+*.log
+
+# Android Studio captures & profiler output
+captures/
+.navigation/
+
+# IntelliJ IDEA / Android Studio project files
+*.iml
+.idea/
+.idea_modules/
+
+# Kotlin compiler cache
+.kotlin/
+
+# Native CMake & NDK build outputs
+.externalNativeBuild/
+.cxx/
+
+# Cryptographic Keys & Keystores (Security Critical)
 *.jks
 *.keystore
 *.key
+*.p12
+
+# Environment Variables & Secrets
 .env
 .env.*
 !.env.example
 
-# Build Artifacts
-*.apk
-*.aab
+# VS Code
+.vscode/
+
+# OS-specific temporary files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db

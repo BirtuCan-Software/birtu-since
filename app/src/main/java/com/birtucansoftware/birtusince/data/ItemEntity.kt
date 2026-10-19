@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.data
+package com.birtucansoftware.birtusince.data
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -33,7 +33,10 @@ data class ItemEntity(
     val preferredUnit: String = "auto",
     val encryptedTitle: String? = null,
     val encryptedNotes: String? = null,
-    val createdAtEpochMillis: Long = System.currentTimeMillis()
+    val createdAtEpochMillis: Long = System.currentTimeMillis(),
+    val isPinned: Boolean = false,
+    val lastModifiedEpochMillis: Long = System.currentTimeMillis(),
+    val isOneTime: Boolean = false
 )
 
 /**

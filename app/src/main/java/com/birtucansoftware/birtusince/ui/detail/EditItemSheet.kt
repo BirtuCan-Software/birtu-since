@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.detail
+package com.birtucansoftware.birtusince.ui.detail
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -61,6 +61,7 @@ fun EditItemSheet(
     var categoryIcon by remember(item, visible) { mutableStateOf(item.categoryIcon) }
     var notes by remember(item, visible) { mutableStateOf(decryptedNotes) }
     var isPrivate by remember(item, visible) { mutableStateOf(item.isPrivate) }
+    var isOneTime by remember(item, visible) { mutableStateOf(item.isOneTime) }
 
     var isRemindEnabled by remember(item, visible) { mutableStateOf(item.targetIntervalMillis != null) }
     var reminderValue by remember(item, visible) {
@@ -261,6 +262,31 @@ fun EditItemSheet(
                 )
             }
 
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // One-time event switch
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "One-time event",
+                        style = BirtuTypography.label.copy(color = colors.text)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    BirtuInfoIconButton(
+                        title = "One-time Event",
+                        explanation = "One-time events cannot be started over. They track elapsed time continuously from a fixed occurrence and do not appear in restart statistics."
+                    )
+                }
+                BirtuSwitch(
+                    checked = isOneTime,
+                    onCheckedChange = { isOneTime = it }
+                )
+            }
+
             Spacer(modifier = Modifier.height(18.dp))
 
             BirtuPrimaryButton(
@@ -283,7 +309,8 @@ fun EditItemSheet(
                         categoryIcon = categoryIcon,
                         notes = notes.trim(),
                         targetIntervalMillis = finalTarget,
-                        isPrivate = isPrivate
+                        isPrivate = isPrivate,
+                        isOneTime = isOneTime
                     )
                     onSaveItem(updated)
                 },

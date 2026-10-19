@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince
+package com.birtucansoftware.birtusince
 
 import android.app.NotificationManager
 import android.content.Context
@@ -183,6 +183,8 @@ class MainActivity : FragmentActivity() {
         val themePreset by this@MainActivity.viewModel.themePreset.collectAsState()
         val isDarkMode by this@MainActivity.viewModel.isDarkMode.collectAsState()
         val selectedFilter by this@MainActivity.viewModel.selectedFilter.collectAsState()
+        val sortOption by this@MainActivity.viewModel.sortOption.collectAsState()
+        val isSortAscending by this@MainActivity.viewModel.isSortAscending.collectAsState()
         val draftTitle by this@MainActivity.viewModel.draftTitle.collectAsState()
 
         val notifManager = remember { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -435,6 +437,11 @@ class MainActivity : FragmentActivity() {
                             unlockedItemIds = unlockedItemIds,
                             selectedFilter = selectedFilter,
                             onFilterSelect = { filter -> viewModel.setSelectedFilter(filter) },
+                            sortOption = sortOption,
+                            isSortAscending = isSortAscending,
+                            onSortOptionSelect = { option -> viewModel.setSortOption(option) },
+                            onSortAscendingToggle = { ascending -> viewModel.setSortAscending(ascending) },
+                            onTogglePinClick = { itemId -> viewModel.togglePinItem(itemId) },
                             onItemClick = { itemId -> selectedDetailItemId = itemId },
                             onStartOverClick = { itemId -> viewModel.startOver(itemId) },
                             onPauseResumeClick = { itemId ->
@@ -465,7 +472,7 @@ class MainActivity : FragmentActivity() {
                         )
 
                         "stats" -> StatsScreen(
-                            items = activeItems + archivedItems,
+                            items = (activeItems + archivedItems).filter { !it.isOneTime },
                             currentTick = currentTick
                         )
 
@@ -579,7 +586,7 @@ class MainActivity : FragmentActivity() {
                     viewModel.showSnackbar(getString(R.string.draft_kept))
                 }
             },
-            onStartItem = { title, startEpoch, category, icon, notes, targetInterval, isPrivate ->
+            onStartItem = { title, startEpoch, category, icon, notes, targetInterval, isPrivate, isOneTime ->
                 showQuickAddSheet = false
                 viewModel.createItem(
                     title = title,
@@ -588,7 +595,8 @@ class MainActivity : FragmentActivity() {
                     categoryIcon = icon,
                     notes = notes,
                     targetIntervalMillis = targetInterval,
-                    isPrivate = isPrivate
+                    isPrivate = isPrivate,
+                    isOneTime = isOneTime
                 )
             },
             existingGroups = activeItems.map { it.category }.filter { it.isNotBlank() }.distinct()

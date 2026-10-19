@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.icons
+package com.birtucansoftware.birtusince.ui.icons
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
@@ -905,6 +905,68 @@ object PhosphorIcons {
         drawCircle(SolidColor(tint), radius = w * 0.38f, center = Offset(w / 2f, h / 2f), style = Stroke(strokeW))
         drawCircle(SolidColor(tint), radius = strokeW * 0.8f, center = Offset(w / 2f, h * 0.35f))
         drawLine(SolidColor(tint), Offset(w / 2f, h * 0.46f), Offset(w / 2f, h * 0.68f), strokeW, StrokeCap.Round)
+    }
+
+    // 40. ArrowsDownUp (Sort)
+    val ArrowsDownUp = PhosphorIconData("ArrowsDownUp") { tint, secondaryTint ->
+        val w = size.width; val h = size.height
+        val strokeW = (w * 0.085f).coerceAtLeast(1.8f)
+
+        drawCircle(SolidColor(secondaryTint), radius = w * 0.38f, center = Offset(w / 2f, h / 2f))
+
+        // Left arrow pointing up
+        val upArrow = Path().apply {
+            moveTo(w * 0.22f, h * 0.40f)
+            lineTo(w * 0.34f, h * 0.26f)
+            lineTo(w * 0.46f, h * 0.40f)
+        }
+        drawPath(upArrow, SolidColor(tint), style = Stroke(strokeW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        drawLine(SolidColor(tint), Offset(w * 0.34f, h * 0.26f), Offset(w * 0.34f, h * 0.74f), strokeW, StrokeCap.Round)
+
+        // Right arrow pointing down
+        val downArrow = Path().apply {
+            moveTo(w * 0.54f, h * 0.60f)
+            lineTo(w * 0.66f, h * 0.74f)
+            lineTo(w * 0.78f, h * 0.60f)
+        }
+        drawPath(downArrow, SolidColor(tint), style = Stroke(strokeW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        drawLine(SolidColor(tint), Offset(w * 0.66f, h * 0.26f), Offset(w * 0.66f, h * 0.74f), strokeW, StrokeCap.Round)
+    }
+
+    // 41. PushPin (Pin item)
+    val PushPin = PhosphorIconData("PushPin") { tint, secondaryTint ->
+        val w = size.width; val h = size.height
+        val strokeW = (w * 0.08f).coerceAtLeast(1.8f)
+
+        // Top head cap
+        drawRoundRect(SolidColor(secondaryTint), Offset(w * 0.30f, h * 0.16f), Size(w * 0.40f, h * 0.10f), CornerRadius(w * 0.04f), style = Fill)
+        drawRoundRect(SolidColor(tint), Offset(w * 0.30f, h * 0.16f), Size(w * 0.40f, h * 0.10f), CornerRadius(w * 0.04f), style = Stroke(strokeW))
+
+        // Body connecting cap to base plate
+        val pinBody = Path().apply {
+            moveTo(w * 0.36f, h * 0.26f)
+            lineTo(w * 0.40f, h * 0.44f)
+            lineTo(w * 0.60f, h * 0.44f)
+            lineTo(w * 0.64f, h * 0.26f)
+            close()
+        }
+        drawPath(pinBody, SolidColor(secondaryTint), style = Fill)
+        drawPath(pinBody, SolidColor(tint), style = Stroke(strokeW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+
+        // Base plate
+        drawRoundRect(SolidColor(secondaryTint), Offset(w * 0.24f, h * 0.44f), Size(w * 0.52f, h * 0.08f), CornerRadius(w * 0.03f), style = Fill)
+        drawRoundRect(SolidColor(tint), Offset(w * 0.24f, h * 0.44f), Size(w * 0.52f, h * 0.08f), CornerRadius(w * 0.03f), style = Stroke(strokeW))
+
+        // Needle pointing down
+        drawLine(SolidColor(tint), Offset(w * 0.50f, h * 0.52f), Offset(w * 0.50f, h * 0.84f), strokeW * 1.1f, StrokeCap.Round)
+    }
+
+    // 42. PushPinSlash (Unpin item)
+    val PushPinSlash = PhosphorIconData("PushPinSlash") { tint, secondaryTint ->
+        PushPin.draw(this, tint, secondaryTint)
+        val w = size.width; val h = size.height
+        val strokeW = (w * 0.08f).coerceAtLeast(1.8f)
+        drawLine(SolidColor(tint), Offset(w * 0.20f, h * 0.20f), Offset(w * 0.80f, h * 0.80f), strokeW * 1.2f, StrokeCap.Round)
     }
 
     /**

@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.home
+package com.birtucansoftware.birtusince.ui.home
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,6 +61,11 @@ fun HomeScreen(
     unlockedItemIds: Set<Long>,
     selectedFilter: String = "All",
     onFilterSelect: (String) -> Unit = {},
+    sortOption: com.birtucansoftware.birtusince.domain.SortOption = com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT,
+    isSortAscending: Boolean = false,
+    onSortOptionSelect: (com.birtucansoftware.birtusince.domain.SortOption) -> Unit = {},
+    onSortAscendingToggle: (Boolean) -> Unit = {},
+    onTogglePinClick: (Long) -> Unit = {},
     onItemClick: (Long) -> Unit,
     onStartOverClick: (Long) -> Unit,
     onPauseResumeClick: (Long) -> Unit,
@@ -75,6 +81,7 @@ fun HomeScreen(
     val listState = rememberLazyListState()
 
     var searchQuery by remember { mutableStateOf("") }
+    var showSortSheet by remember { mutableStateOf(false) }
 
     // Resolve derived status for items
     val resolvedItems = remember(items, currentTick, unlockedItemIds) {
@@ -128,21 +135,57 @@ fun HomeScreen(
         }
     }
 
+    // Sort items: Pinned items always appear at the top, then sorted by chosen criterion
+    val sortedAndFilteredItems = remember(filteredItems, sortOption, isSortAscending, currentTick) {
+        filteredItems.sortedWith { a, b ->
+            val itemA = a.first
+            val itemB = b.first
+            val derivedA = a.second
+            val derivedB = b.second
+
+            // Pinned items always come first!
+            if (itemA.isPinned != itemB.isPinned) {
+                return@sortedWith if (itemA.isPinned) -1 else 1
+            }
+
+            val comparison = when (sortOption) {
+                com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT -> {
+                    itemA.createdAtEpochMillis.compareTo(itemB.createdAtEpochMillis)
+                }
+                com.birtucansoftware.birtusince.domain.SortOption.MOST_LAPS -> {
+                    itemA.lifetimeRestarts.compareTo(itemB.lifetimeRestarts)
+                }
+                com.birtucansoftware.birtusince.domain.SortOption.LAST_MODIFIED -> {
+                    val modA = if (itemA.lastModifiedEpochMillis > 0) itemA.lastModifiedEpochMillis else itemA.createdAtEpochMillis
+                    val modB = if (itemB.lastModifiedEpochMillis > 0) itemB.lastModifiedEpochMillis else itemB.createdAtEpochMillis
+                    modA.compareTo(modB)
+                }
+                com.birtucansoftware.birtusince.domain.SortOption.LONGEST_ELAPSED -> {
+                    derivedA.elapsedMillis.compareTo(derivedB.elapsedMillis)
+                }
+            }
+
+            if (isSortAscending) comparison else -comparison
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(colors.bg)
     ) {
-        // Search bar inside the Home page body (always available, cleanly integrated)
-        Box(
+        // Search bar & Sort icon button on the same line
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 6.dp)
-                .then(searchBarModifier)
+                .then(searchBarModifier),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Search Bar Input
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .weight(1f)
                     .height(44.dp)
                     .clip(RoundedCornerShape(14.dp))
                     .background(colors.surfaceRaised)
@@ -186,6 +229,41 @@ fun HomeScreen(
                         onClick = { searchQuery = "" }
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Sort icon button on the same line as the search bar but on its right
+            val isCustomSortActive = sortOption != com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT || isSortAscending
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        if (isCustomSortActive) {
+                            if (colors.isDark) colors.surfaceRaised else colors.primarySoft
+                        } else {
+                            colors.surfaceRaised
+                        }
+                    )
+                    .border(
+                        1.dp,
+                        if (isCustomSortActive) colors.primaryStrong else colors.outline,
+                        RoundedCornerShape(14.dp)
+                    )
+                    .clickable(
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                        indication = null,
+                        onClick = { showSortSheet = true }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                PhosphorIcon(
+                    icon = PhosphorIcons.ArrowsDownUp,
+                    contentDescription = "Sort records",
+                    tint = if (isCustomSortActive) colors.primaryStrong else colors.text,
+                    size = 20.dp
+                )
             }
         }
 
@@ -318,7 +396,7 @@ fun HomeScreen(
                         )
                     }
                 }
-            } else if (filteredItems.isEmpty()) {
+            } else if (sortedAndFilteredItems.isEmpty()) {
                 // No search or filter match
                 Box(
                     modifier = Modifier
@@ -351,6 +429,18 @@ fun HomeScreen(
                             text = "No match",
                             style = BirtuTypography.titleM.copy(color = colors.text)
                         )
+                        if (searchQuery.isNotEmpty() || selectedFilter != "All" || sortOption != com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT || isSortAscending) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            BirtuTextButton(
+                                text = "Clear filter",
+                                onClick = {
+                                    searchQuery = ""
+                                    onFilterSelect("All")
+                                    onSortOptionSelect(com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT)
+                                    onSortAscendingToggle(false)
+                                }
+                            )
+                        }
                     }
                 }
             } else {
@@ -361,7 +451,7 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(
-                        items = filteredItems,
+                        items = sortedAndFilteredItems,
                         key = { it.first.id }
                     ) { (item, derived) ->
                         val isUnlocked = unlockedItemIds.contains(item.id)
@@ -379,11 +469,29 @@ fun HomeScreen(
                             onStartOver = { onStartOverClick(item.id) },
                             onPauseResume = { onPauseResumeClick(item.id) },
                             onPutAway = { onPutAwayClick(item.id) },
-                            onDelete = { onDeleteClick(item.id) }
+                            onDelete = { onDeleteClick(item.id) },
+                            onTogglePin = { onTogglePinClick(item.id) }
                         )
                     }
                 }
             }
         }
     }
+
+    // Sort Bottom Sheet
+    SortBottomSheet(
+        visible = showSortSheet,
+        selectedOption = sortOption,
+        isAscending = isSortAscending,
+        selectedFilter = selectedFilter,
+        onOptionSelect = onSortOptionSelect,
+        onAscendingToggle = onSortAscendingToggle,
+        onFilterSelect = onFilterSelect,
+        onClearFilter = {
+            onSortOptionSelect(com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT)
+            onSortAscendingToggle(false)
+            onFilterSelect("All")
+        },
+        onDismissRequest = { showSortSheet = false }
+    )
 }

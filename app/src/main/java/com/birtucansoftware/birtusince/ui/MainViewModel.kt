@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui
+package com.birtucansoftware.birtusince.ui
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -41,6 +41,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val selectedFilter: StateFlow<String> = preferences.selectedFilterFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, "All")
+
+    val sortOption: StateFlow<com.birtucansoftware.birtusince.domain.SortOption> = preferences.sortOptionFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT)
+
+    val isSortAscending: StateFlow<Boolean> = preferences.isSortAscendingFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val appLockEnabled: StateFlow<Boolean> = preferences.appLockEnabledFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -122,6 +128,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun setSortOption(option: com.birtucansoftware.birtusince.domain.SortOption) {
+        viewModelScope.launch {
+            preferences.setSortOption(option)
+        }
+    }
+
+    fun setSortAscending(ascending: Boolean) {
+        viewModelScope.launch {
+            preferences.setSortAscending(ascending)
+        }
+    }
+
+    fun toggleSortAscending() {
+        viewModelScope.launch {
+            preferences.toggleSortAscending()
+        }
+    }
+
     fun createItem(
         title: String,
         startEpochMillis: Long = System.currentTimeMillis(),
@@ -129,7 +153,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         categoryIcon: String = "Timer",
         notes: String = "",
         targetIntervalMillis: Long? = null,
-        isPrivate: Boolean = false
+        isPrivate: Boolean = false,
+        isOneTime: Boolean = false
     ) {
         viewModelScope.launch {
             val id = repository.createItem(
@@ -139,7 +164,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 categoryIcon = categoryIcon,
                 notes = notes,
                 targetIntervalMillis = targetIntervalMillis,
-                isPrivate = isPrivate
+                isPrivate = isPrivate,
+                isOneTime = isOneTime
             )
             setDraftTitle("") // Clear draft
 
@@ -245,6 +271,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 AlarmScheduler.cancelItemReminder(getApplication(), item.id)
             }
             refreshWidgetsAndShortcuts()
+        }
+    }
+
+    fun togglePinItem(itemId: Long) {
+        viewModelScope.launch {
+            repository.togglePinItem(itemId)
+            val item = repository.getItem(itemId)
+            val isPinned = item?.isPinned == true
+            _snackbarEvent.value = SnackbarEvent(
+                message = if (isPinned) "Pinned to top" else "Unpinned"
+            )
         }
     }
 

@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.home
+package com.birtucansoftware.birtusince.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,6 +51,7 @@ fun HomeItemCard(
     onPauseResume: () -> Unit,
     onPutAway: () -> Unit,
     onDelete: () -> Unit,
+    onTogglePin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalBirtuColors.current
@@ -84,6 +85,15 @@ fun HomeItemCard(
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (item.isPinned) {
+                                PhosphorIcon(
+                                    icon = PhosphorIcons.PushPin,
+                                    contentDescription = "Pinned",
+                                    tint = colors.primaryStrong,
+                                    size = 14.dp
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                            }
                             PhosphorIcon(
                                 icon = PhosphorIcons.Lock,
                                 contentDescription = "Locked",
@@ -107,12 +117,23 @@ fun HomeItemCard(
                             style = BirtuTypography.caption.copy(color = colors.text2)
                         )
                     } else {
-                        Text(
-                            text = item.title,
-                            style = BirtuTypography.titleM.copy(color = colors.text),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (item.isPinned) {
+                                PhosphorIcon(
+                                    icon = PhosphorIcons.PushPin,
+                                    contentDescription = "Pinned",
+                                    tint = colors.primaryStrong,
+                                    size = 14.dp
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                            }
+                            Text(
+                                text = item.title,
+                                style = BirtuTypography.titleM.copy(color = colors.text),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(2.dp))
                         val timerColor = when {
@@ -225,7 +246,7 @@ fun HomeItemCard(
                     }
 
                     // Quick Start Over circle button
-                    if (!isLocked) {
+                    if (!isLocked && !item.isOneTime) {
                         BirtuIconButton(
                             icon = PhosphorIcons.ArrowCounterClockwise,
                             contentDescription = "Start over",
@@ -245,7 +266,30 @@ fun HomeItemCard(
             onDismissRequest = { showMenu = false }
         ) {
             DropdownMenuItem(
+                text = { Text(if (item.isPinned) "Unpin" else "Pin to top") },
+                leadingIcon = {
+                    PhosphorIcon(
+                        icon = if (item.isPinned) PhosphorIcons.PushPinSlash else PhosphorIcons.PushPin,
+                        contentDescription = null,
+                        size = 18.dp,
+                        tint = if (item.isPinned) colors.primaryStrong else colors.text
+                    )
+                },
+                onClick = {
+                    showMenu = false
+                    onTogglePin()
+                }
+            )
+            DropdownMenuItem(
                 text = { Text(if (isPaused) "Resume" else "Pause") },
+                leadingIcon = {
+                    PhosphorIcon(
+                        icon = if (isPaused) PhosphorIcons.Play else PhosphorIcons.Pause,
+                        contentDescription = null,
+                        size = 18.dp,
+                        tint = colors.text
+                    )
+                },
                 onClick = {
                     showMenu = false
                     onPauseResume()
@@ -253,6 +297,14 @@ fun HomeItemCard(
             )
             DropdownMenuItem(
                 text = { Text("Put away") },
+                leadingIcon = {
+                    PhosphorIcon(
+                        icon = PhosphorIcons.Archive,
+                        contentDescription = null,
+                        size = 18.dp,
+                        tint = colors.text
+                    )
+                },
                 onClick = {
                     showMenu = false
                     onPutAway()
@@ -260,6 +312,14 @@ fun HomeItemCard(
             )
             DropdownMenuItem(
                 text = { Text("Delete", color = colors.late) },
+                leadingIcon = {
+                    PhosphorIcon(
+                        icon = PhosphorIcons.Trash,
+                        contentDescription = null,
+                        size = 18.dp,
+                        tint = colors.late
+                    )
+                },
                 onClick = {
                     showMenu = false
                     onDelete()

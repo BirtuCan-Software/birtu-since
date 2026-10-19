@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.data
+package com.birtucansoftware.birtusince.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -20,6 +20,8 @@ class PreferencesManager(private val context: Context) {
     private val appLockKey = booleanPreferencesKey("app_lock_enabled")
     private val draftTitleKey = stringPreferencesKey("quick_add_draft_title")
     private val filterChipKey = stringPreferencesKey("selected_filter_chip")
+    private val sortOptionKey = stringPreferencesKey("sort_option")
+    private val sortAscendingKey = booleanPreferencesKey("sort_ascending")
 
     val themePresetFlow: Flow<ThemePreset> = context.dataStore.data.map { prefs ->
         when (prefs[themeKey]) {
@@ -46,6 +48,14 @@ class PreferencesManager(private val context: Context) {
 
     val selectedFilterFlow: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[filterChipKey] ?: "All"
+    }
+
+    val sortOptionFlow: Flow<com.birtucansoftware.birtusince.domain.SortOption> = context.dataStore.data.map { prefs ->
+        com.birtucansoftware.birtusince.domain.SortOption.fromName(prefs[sortOptionKey])
+    }
+
+    val isSortAscendingFlow: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[sortAscendingKey] ?: false
     }
 
     suspend fun setThemePreset(preset: ThemePreset) {
@@ -82,6 +92,25 @@ class PreferencesManager(private val context: Context) {
     suspend fun setSelectedFilter(filter: String) {
         context.dataStore.edit { prefs ->
             prefs[filterChipKey] = filter
+        }
+    }
+
+    suspend fun setSortOption(option: com.birtucansoftware.birtusince.domain.SortOption) {
+        context.dataStore.edit { prefs ->
+            prefs[sortOptionKey] = option.name
+        }
+    }
+
+    suspend fun setSortAscending(ascending: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[sortAscendingKey] = ascending
+        }
+    }
+
+    suspend fun toggleSortAscending() {
+        context.dataStore.edit { prefs ->
+            val current = prefs[sortAscendingKey] ?: false
+            prefs[sortAscendingKey] = !current
         }
     }
 }

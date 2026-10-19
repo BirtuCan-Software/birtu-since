@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.detail
+package com.birtucansoftware.birtusince.ui.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -281,14 +281,16 @@ fun ItemDetailScreen(
 
             // Action Buttons
             if (!isArchived) {
-                BirtuPrimaryButton(
-                    text = "Start over",
-                    icon = PhosphorIcons.ArrowCounterClockwise,
-                    onClick = { showStartOverSheet = true },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (!item.isOneTime) {
+                    BirtuPrimaryButton(
+                        text = "Start over",
+                        icon = PhosphorIcons.ArrowCounterClockwise,
+                        onClick = { showStartOverSheet = true },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -330,7 +332,7 @@ fun ItemDetailScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Information & Settings Section (Target reminder, Group, Note, Lock)
+            // Information & Settings Section (Target reminder, Group, Note, Lock, One-time event)
             ItemDetailInfoSection(
                 item = item,
                 decryptedTitle = decryptedTitle,
@@ -341,21 +343,29 @@ fun ItemDetailScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Your Pattern Analytics Section
-            PatternStatsSection(
-                patternStats = patternStats,
-                targetIntervalMillis = item.targetIntervalMillis
-            )
+            // Your Pattern Analytics & Past Runs Section (only for repeatable events with history)
+            if (!item.isOneTime) {
+                PatternStatsSection(
+                    patternStats = patternStats,
+                    targetIntervalMillis = item.targetIntervalMillis
+                )
 
-            Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
-            // Past Runs History Section
-            ItemDetailPastRunsSection(
-                laps = laps,
-                onLapClick = { selectedLapToEdit = it }
-            )
+                ItemDetailPastRunsSection(
+                    laps = laps,
+                    onLapClick = { selectedLapToEdit = it }
+                )
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(32.dp))
+            } else if (laps.isNotEmpty()) {
+                ItemDetailPastRunsSection(
+                    laps = laps,
+                    onLapClick = { selectedLapToEdit = it }
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+            }
         }
     }
 

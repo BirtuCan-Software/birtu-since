@@ -1,4 +1,4 @@
-﻿package com.birtucansoftware.birtusince.ui.stats
+package com.birtucansoftware.birtusince.ui.stats
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -50,8 +50,13 @@ fun StatsScreen(
 ) {
     val colors = LocalBirtuColors.current
 
-    val resolvedItems = remember(items, currentTick) {
-        items.map { item ->
+    // One-time items that cannot be started over do not appear in the stats page
+    val eligibleItems = remember(items) {
+        items.filter { !it.isOneTime }
+    }
+
+    val resolvedItems = remember(eligibleItems, currentTick) {
+        eligibleItems.map { item ->
             val derived = ItemStateResolver.resolve(
                 startEpochMillis = item.startEpochMillis,
                 isPaused = item.isPaused,
@@ -73,8 +78,8 @@ fun StatsScreen(
     val lateCount = remember(resolvedItems) {
         resolvedItems.count { it.second.state is ItemState.Late }
     }
-    val totalRestarts = remember(items) {
-        items.sumOf { it.lifetimeRestarts }
+    val totalRestarts = remember(eligibleItems) {
+        eligibleItems.sumOf { it.lifetimeRestarts }
     }
 
     // Top 5 longest runs
@@ -85,8 +90,8 @@ fun StatsScreen(
     }
 
     // Top 5 most restarts
-    val mostRestarts = remember(items) {
-        items
+    val mostRestarts = remember(eligibleItems) {
+        eligibleItems
             .sortedByDescending { it.lifetimeRestarts }
             .take(5)
     }
@@ -99,7 +104,7 @@ fun StatsScreen(
             .fillMaxSize()
             .background(colors.bg)
     ) {
-        if (items.size < 2) {
+        if (eligibleItems.size < 2) {
             // Empty State (UI Spec 9.6)
             Box(
                 modifier = Modifier
