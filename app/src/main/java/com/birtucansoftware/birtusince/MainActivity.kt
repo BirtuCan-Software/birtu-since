@@ -439,7 +439,6 @@ class MainActivity : FragmentActivity() {
                             filterSelection = filterSelection,
                             onFilterSelectionChange = { selection -> viewModel.setFilterSelection(selection) },
                             selectedFilter = selectedFilter,
-                            onFilterSelect = { filter -> viewModel.setSelectedFilter(filter) },
                             sortOption = sortOption,
                             isSortAscending = isSortAscending,
                             onSortOptionSelect = { option -> viewModel.setSortOption(option) },

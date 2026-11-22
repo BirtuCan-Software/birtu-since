@@ -101,6 +101,13 @@ object PhosphorIcons {
         drawLine(SolidColor(tint), Offset(w * 0.5f, h * 0.22f), Offset(w * 0.5f, h * 0.78f), strokeW, StrokeCap.Round)
     }
 
+    // 3b. Minus (Decrease), same style as Plus
+    val Minus = PhosphorIconData("Minus") { tint, secondaryTint ->
+        val w = size.width; val h = size.height
+        val strokeW = (w * 0.09f).coerceAtLeast(2.0f)
+        drawCircle(SolidColor(secondaryTint), radius = w * 0.38f, center = Offset(w / 2f, h / 2f))
+        drawLine(SolidColor(tint), Offset(w * 0.22f, h * 0.5f), Offset(w * 0.78f, h * 0.5f), strokeW, StrokeCap.Round)
+    }
     // 4. Archive (Put away)
     val Archive = PhosphorIconData("Archive") { tint, secondaryTint ->
         val w = size.width; val h = size.height

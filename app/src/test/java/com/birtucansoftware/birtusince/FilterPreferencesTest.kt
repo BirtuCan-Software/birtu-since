@@ -54,6 +54,16 @@ class FilterPreferencesTest {
     }
 
     @Test
+    fun testSaveAndRestoreSelectAllMode() = runBlocking {
+        val selection = FilterSelection(isAllSelected = true, excludedCategories = setOf("Chores"))
+        preferences.setFilterSelection(selection)
+        assertEquals(selection, preferences.filterSelectionFlow.first())
+
+        preferences.setFilterSelection(FilterSelection())
+        assertFalse(preferences.filterSelectionFlow.first().isAllSelected)
+    }
+
+    @Test
     fun testLegacySetSelectedFilter() = runBlocking {
         preferences.setSelectedFilter("Personal")
         val restored = preferences.filterSelectionFlow.first()

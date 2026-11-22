@@ -3,12 +3,16 @@ package com.birtucansoftware.birtusince.domain
 /**
  * Filter selection criteria for Home Screen records.
  * Supports inclusion and exclusion for categories and status.
+ *
+ * [isAllSelected] is the "select all" mode turned on from the "All" chip: every group
+ * counts as selected, and tapping a group deselects it (adds it to [excludedCategories]).
  */
 data class FilterSelection(
     val includedCategories: Set<String> = emptySet(),
     val excludedCategories: Set<String> = emptySet(),
     val isLateIncluded: Boolean = false,
-    val isLateExcluded: Boolean = false
+    val isLateExcluded: Boolean = false,
+    val isAllSelected: Boolean = false
 ) {
     val isEmpty: Boolean
         get() = includedCategories.isEmpty() &&
@@ -53,6 +57,24 @@ data class FilterSelection(
             )
         }
     }
+
+    /**
+     * "All" chip: turns on select-all mode (every group selected, other filters cleared).
+     * Pressing it again while nothing is deselected goes back to the default selection.
+     */
+    fun toggleAll(): FilterSelection =
+        if (isAllSelected && isEmpty) FilterSelection() else FilterSelection(isAllSelected = true)
+
+    /** Whether a group chip shows as selected in select-all mode. */
+    fun isCategorySelectedInAll(category: String): Boolean =
+        isAllSelected && !isCategoryExcluded(category)
+
+    /**
+     * Tap on a group chip. In select-all mode it deselects/reselects the group;
+     * otherwise it adds/removes the group from the included set.
+     */
+    fun toggleCategoryChip(category: String): FilterSelection =
+        if (isAllSelected) toggleExcludeCategory(category) else toggleIncludeCategory(category)
 
     fun toggleIncludeLate(): FilterSelection {
         return if (isLateIncluded) {

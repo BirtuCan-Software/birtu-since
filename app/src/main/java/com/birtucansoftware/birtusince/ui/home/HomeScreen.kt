@@ -64,7 +64,6 @@ fun HomeScreen(
     filterSelection: FilterSelection = FilterSelection(),
     onFilterSelectionChange: (FilterSelection) -> Unit = {},
     selectedFilter: String = "All",
-    onFilterSelect: (String) -> Unit = {},
     sortOption: com.birtucansoftware.birtusince.domain.SortOption = com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT,
     isSortAscending: Boolean = false,
     onSortOptionSelect: (com.birtucansoftware.birtusince.domain.SortOption) -> Unit = {},
@@ -331,8 +330,8 @@ fun HomeScreen(
                 label = "All",
                 state = if (currentFilterSelection.isEmpty) FilterChipState.Included else FilterChipState.Neutral,
                 onClick = {
-                    onFilterSelectionChange(FilterSelection())
-                    onFilterSelect("All")
+                    // Selects every group chip so the user can deselect one or two
+                    onFilterSelectionChange(currentFilterSelection.toggleAll())
                 }
             )
             BirtuChip(
@@ -345,16 +344,18 @@ fun HomeScreen(
                 onClick = {
                     val next = currentFilterSelection.toggleIncludeLate()
                     onFilterSelectionChange(next)
-                    onFilterSelect(if (next.isLateIncluded) "Late" else "All")
                 },
                 onLongClick = {
                     val next = currentFilterSelection.toggleExcludeLate()
                     onFilterSelectionChange(next)
-                    onFilterSelect("All")
                 }
             )
             groups.forEach { groupName ->
                 val chipState = when {
+                    // Select-all mode: selected unless the user deselected it
+                    currentFilterSelection.isAllSelected ->
+                        if (currentFilterSelection.isCategorySelectedInAll(groupName)) FilterChipState.Included
+                        else FilterChipState.Neutral
                     currentFilterSelection.isCategoryIncluded(groupName) -> FilterChipState.Included
                     currentFilterSelection.isCategoryExcluded(groupName) -> FilterChipState.Excluded
                     else -> FilterChipState.Neutral
@@ -363,14 +364,12 @@ fun HomeScreen(
                     label = groupName,
                     state = chipState,
                     onClick = {
-                        val next = currentFilterSelection.toggleIncludeCategory(groupName)
+                        val next = currentFilterSelection.toggleCategoryChip(groupName)
                         onFilterSelectionChange(next)
-                        onFilterSelect(if (next.isCategoryIncluded(groupName)) groupName else "All")
                     },
                     onLongClick = {
                         val next = currentFilterSelection.toggleExcludeCategory(groupName)
                         onFilterSelectionChange(next)
-                        onFilterSelect("All")
                     }
                 )
             }
@@ -479,7 +478,6 @@ fun HomeScreen(
                                 onClick = {
                                     searchQuery = ""
                                     onFilterSelectionChange(FilterSelection())
-                                    onFilterSelect("All")
                                     onSortOptionSelect(com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT)
                                     onSortAscendingToggle(false)
                                 }
@@ -532,12 +530,10 @@ fun HomeScreen(
         onOptionSelect = onSortOptionSelect,
         onAscendingToggle = onSortAscendingToggle,
         onFilterSelectionChange = onFilterSelectionChange,
-        onFilterSelect = onFilterSelect,
         onClearFilter = {
             onSortOptionSelect(com.birtucansoftware.birtusince.domain.SortOption.CREATED_AT)
             onSortAscendingToggle(false)
             onFilterSelectionChange(FilterSelection())
-            onFilterSelect("All")
         },
         onDismissRequest = { showSortSheet = false }
     )

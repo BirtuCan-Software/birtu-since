@@ -26,6 +26,7 @@ class PreferencesManager(private val context: Context) {
     private val excludedCategoriesKey = stringSetPreferencesKey("filter_excluded_categories")
     private val isLateIncludedKey = booleanPreferencesKey("filter_is_late_included")
     private val isLateExcludedKey = booleanPreferencesKey("filter_is_late_excluded")
+    private val isAllSelectedKey = booleanPreferencesKey("filter_is_all_selected")
     private val sortOptionKey = stringPreferencesKey("sort_option")
     private val sortAscendingKey = booleanPreferencesKey("sort_ascending")
 
@@ -63,7 +64,8 @@ class PreferencesManager(private val context: Context) {
                 includedCategories = prefs[includedCategoriesKey] ?: emptySet(),
                 excludedCategories = prefs[excludedCategoriesKey] ?: emptySet(),
                 isLateIncluded = prefs[isLateIncludedKey] ?: false,
-                isLateExcluded = prefs[isLateExcludedKey] ?: false
+                isLateExcluded = prefs[isLateExcludedKey] ?: false,
+                isAllSelected = prefs[isAllSelectedKey] ?: false
             )
         } else {
             FilterSelection.fromLegacyString(prefs[filterChipKey])
@@ -124,6 +126,7 @@ class PreferencesManager(private val context: Context) {
             prefs[excludedCategoriesKey] = selection.excludedCategories
             prefs[isLateIncludedKey] = selection.isLateIncluded
             prefs[isLateExcludedKey] = selection.isLateExcluded
+            prefs[isAllSelectedKey] = selection.isAllSelected
             prefs[filterChipKey] = when {
                 selection.isEmpty -> "All"
                 selection.isLateIncluded -> "Late"

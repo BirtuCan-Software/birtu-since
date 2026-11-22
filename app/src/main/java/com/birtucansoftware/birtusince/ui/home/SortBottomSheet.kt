@@ -48,7 +48,6 @@ fun SortBottomSheet(
     onOptionSelect: (SortOption) -> Unit,
     onAscendingToggle: (Boolean) -> Unit,
     onFilterSelectionChange: ((FilterSelection) -> Unit)? = null,
-    onFilterSelect: ((String) -> Unit)? = null,
     onClearFilter: (() -> Unit)? = null,
     onDismissRequest: () -> Unit
 ) {
@@ -107,7 +106,6 @@ fun SortBottomSheet(
                             onOptionSelect(SortOption.CREATED_AT)
                             onAscendingToggle(false)
                             onFilterSelectionChange?.invoke(FilterSelection())
-                            onFilterSelect?.invoke("All")
                         }
                     },
                     textColor = colors.primaryStrong,
@@ -138,7 +136,6 @@ fun SortBottomSheet(
                         onRemove = {
                             val next = effectiveFilter.toggleIncludeLate()
                             onFilterSelectionChange?.invoke(next)
-                            onFilterSelect?.invoke(if (next.isEmpty) "All" else "Custom")
                         }
                     )
                 }
@@ -150,7 +147,6 @@ fun SortBottomSheet(
                         onRemove = {
                             val next = effectiveFilter.toggleExcludeLate()
                             onFilterSelectionChange?.invoke(next)
-                            onFilterSelect?.invoke(if (next.isEmpty) "All" else "Custom")
                         }
                     )
                 }
@@ -162,7 +158,6 @@ fun SortBottomSheet(
                         onRemove = {
                             val next = effectiveFilter.toggleIncludeCategory(cat)
                             onFilterSelectionChange?.invoke(next)
-                            onFilterSelect?.invoke(if (next.isEmpty) "All" else "Custom")
                         }
                     )
                 }
@@ -174,7 +169,6 @@ fun SortBottomSheet(
                         onRemove = {
                             val next = effectiveFilter.toggleExcludeCategory(cat)
                             onFilterSelectionChange?.invoke(next)
-                            onFilterSelect?.invoke(if (next.isEmpty) "All" else "Custom")
                         }
                     )
                 }

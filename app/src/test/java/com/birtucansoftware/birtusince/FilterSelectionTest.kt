@@ -133,4 +133,49 @@ class FilterSelectionTest {
         assertEquals(FilterSelection(isLateIncluded = true), FilterSelection.fromLegacyString("Late"))
         assertEquals(FilterSelection(includedCategories = setOf("Work")), FilterSelection.fromLegacyString("Work"))
     }
+
+    @Test
+    fun testToggleAllSelectsEveryGroup() {
+        val all = FilterSelection(includedCategories = setOf("Work"), isLateIncluded = true).toggleAll()
+        assertTrue(all.isAllSelected)
+        assertTrue(all.isEmpty)
+        assertTrue(all.isCategorySelectedInAll("Work"))
+        assertTrue(all.isCategorySelectedInAll("Health"))
+        assertTrue(all.matches("Work", isLate = false))
+        assertTrue(all.matches("", isLate = false))
+    }
+
+    @Test
+    fun testDeselectGroupInAllMode() {
+        val all = FilterSelection().toggleAll()
+        val next = all.toggleCategoryChip("Chores")
+        assertTrue(next.isAllSelected)
+        assertFalse(next.isCategorySelectedInAll("Chores"))
+        assertTrue(next.isCategorySelectedInAll("Work"))
+        assertFalse(next.matches("Chores", isLate = false))
+        assertTrue(next.matches("Work", isLate = false))
+        assertTrue(next.matches("", isLate = false))
+
+        // Tapping again reselects it
+        val reselected = next.toggleCategoryChip("Chores")
+        assertTrue(reselected.isCategorySelectedInAll("Chores"))
+        assertTrue(reselected.matches("Chores", isLate = false))
+    }
+
+    @Test
+    fun testToggleAllAgainResetsToDefault() {
+        val all = FilterSelection().toggleAll()
+        assertEquals(FilterSelection(), all.toggleAll())
+
+        // With a deselected group, All reselects everything instead of leaving the mode
+        val withDeselected = all.toggleCategoryChip("Chores")
+        assertEquals(FilterSelection(isAllSelected = true), withDeselected.toggleAll())
+    }
+
+    @Test
+    fun testCategoryChipOutsideAllModeIncludes() {
+        val next = FilterSelection().toggleCategoryChip("Work").toggleCategoryChip("Health")
+        assertFalse(next.isAllSelected)
+        assertEquals(setOf("Work", "Health"), next.includedCategories)
+    }
 }
